@@ -14,7 +14,7 @@ namespace WebAPIMvc5
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-                name: "DefaultApi",
+                name: "Default",
                 url: "api/{controller}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
 
