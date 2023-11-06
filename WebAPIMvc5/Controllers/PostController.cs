@@ -5,45 +5,54 @@ using System.Net;
 using System.Web;
 using System.Web.Http;
 using WebAPIMvc5.Models;
-using System.Data.Entity; // Import namespace Entity
+using System.Data.Entity; 
 
 namespace WebAPIMvc5.Controllers
 {
     public class PostsController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext(); // Membuat instance DbContext
+        private readonly ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/Posts
+        [Authorize]
         public IHttpActionResult Get()
         {
-            var posts = db.Posts.ToList(); // Mengambil semua entitas Posts dari database
+            var posts = db.Posts.ToList(); 
             return Ok(posts);
         }
 
         // GET: api/Posts/1
+        [Authorize]
         public IHttpActionResult Get(int id)
         {
-            var post = db.Posts.FirstOrDefault(p => p.Id == id); // Mengambil entitas Post berdasarkan ID
+            var post = db.Posts.FirstOrDefault(p => p.Id == id); 
             if (post == null)
                 return NotFound();
             return Ok(post);
         }
 
         // POST: api/Posts
+        [Authorize]
         public IHttpActionResult Post([FromBody] Post post)
         {
-            // Logika untuk menambahkan post ke sumber data
-            db.Posts.Add(post);
-            db.SaveChanges();
+            post.CreatedAt = DateTime.Now;
 
-            // Kemudian kirim respons Created dengan URL ke post yang baru dibuat
-            return Created("api/posts/" + post.Id, post);
+            try
+            {
+                db.Posts.Add(post);
+                db.SaveChanges();
+                return Created("api/posts/" + post.Id, post);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("An error occurred while adding the post: " + ex.Message);
+            }
         }
 
         // PUT: api/Posts/1
+        [Authorize]
         public IHttpActionResult Put(int id, [FromBody] Post post)
         {
-            // Logika untuk mengupdate post dalam sumber data
             var existingPost = db.Posts.FirstOrDefault(p => p.Id == id);
             if (existingPost == null)
                 return NotFound();
@@ -56,6 +65,7 @@ namespace WebAPIMvc5.Controllers
         }
 
         // DELETE: api/Posts/1
+        [Authorize]
         public IHttpActionResult Delete(int id)
         {
             var post = db.Posts.FirstOrDefault(p => p.Id == id);
@@ -65,7 +75,6 @@ namespace WebAPIMvc5.Controllers
             db.Posts.Remove(post);
             db.SaveChanges();
 
-            // Logika untuk menghapus post dari sumber data
             return StatusCode(HttpStatusCode.NoContent);
         }
     }
